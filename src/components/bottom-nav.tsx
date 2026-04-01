@@ -15,22 +15,22 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A] border-t border-[#2A2A2A] z-50 safe-area-pb">
-      <div className="flex justify-around items-center py-3">
+    <nav className="fixed bottom-0 left-0 right-0 bg-[#0A0A0A] border-t border-[#1A1A1A] z-50">
+      <div className="flex justify-around items-center h-16">
         {navItems.map(({ href, icon: Icon, label }) => {
-          const isActive = pathname === href || (href === '/' && pathname === '/');
+          const isActive = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className="flex flex-col items-center min-w-[70px]"
+              className="flex flex-col items-center justify-center flex-1 h-full"
             >
               <Icon 
                 size={24} 
-                className={isActive ? 'text-[#D4AF37]' : 'text-[#666666]'}
-                fill={isActive ? '#D4AF37' : 'none'}
+                className={isActive ? 'text-[#38BDF8]' : 'text-[#555555]'}
+                fill={isActive ? '#38BDF8' : 'none'}
               />
-              <span className={`text-[11px] mt-1 font-medium ${isActive ? 'text-[#D4AF37]' : 'text-[#666666]'}`}>
+              <span className={`text-[10px] mt-1 font-medium ${isActive ? 'text-[#38BDF8]' : 'text-[#555555]'}`}>
                 {label}
               </span>
             </Link>

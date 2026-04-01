@@ -87,9 +87,11 @@ export default function AdminProductsPage() {
     try {
       if (tab === 'categories') {
         if (editItem) {
-          await supabase.from('categories').update({ name: formName, image: formImage }).eq('id', editItem.id);
+          const { error } = await supabase.from('categories').update({ name: formName, image: formImage }).eq('id', editItem.id);
+          if (error) throw error;
         } else {
-          await supabase.from('categories').insert({ name: formName, image: formImage, display_order: categories.length });
+          const { error } = await supabase.from('categories').insert({ name: formName, image: formImage, display_order: categories.length, active: true });
+          if (error) throw error;
         }
       } else {
         if (!formCategoryId) {
@@ -98,21 +100,24 @@ export default function AdminProductsPage() {
           return;
         }
         if (editItem) {
-          await supabase.from('products').update({ 
+          const { error } = await supabase.from('products').update({ 
             name: formName, 
             description: formDesc, 
             image: formImage, 
             category_id: formCategoryId 
           }).eq('id', editItem.id);
+          if (error) throw error;
         } else {
           const maxOrder = products.filter(p => p.category_id === formCategoryId).length;
-          await supabase.from('products').insert({ 
+          const { error } = await supabase.from('products').insert({ 
             name: formName, 
             description: formDesc, 
             image: formImage, 
             category_id: formCategoryId,
-            display_order: maxOrder
+            display_order: maxOrder,
+            active: true
           });
+          if (error) throw error;
         }
       }
       setShowModal(false);

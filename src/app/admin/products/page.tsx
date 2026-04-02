@@ -94,18 +94,19 @@ export default function AdminProductsPage() {
     try {
       if (tab === 'categories') {
         if (editItem) {
-          const { error } = await supabase.from('categories').update({ name: formName, image: formImage }).eq('id', editItem.id);
+          const { error } = await supabase.from('categories').update({ name: formName, image: formImage }).eq('id', editItem.id).select();
           if (error) {
             console.error('Update error:', error);
             throw error;
           }
         } else {
-          const { error } = await supabase.from('categories').insert({ 
+          const { data, error } = await supabase.from('categories').insert({ 
             name: formName, 
             image: formImage, 
             display_order: categories.length, 
             active: true 
-          });
+          }).select();
+          console.log('Insert result:', data, error);
           if (error) {
             console.error('Insert error:', error);
             throw error;
@@ -123,21 +124,22 @@ export default function AdminProductsPage() {
             description: formDesc, 
             image: formImage, 
             category_id: formCategoryId 
-          }).eq('id', editItem.id);
+          }).eq('id', editItem.id).select();
           if (error) {
             console.error('Update error:', error);
             throw error;
           }
         } else {
           const maxOrder = products.filter(p => p.category_id === formCategoryId).length;
-          const { error } = await supabase.from('products').insert({ 
+          const { data, error } = await supabase.from('products').insert({ 
             name: formName, 
             description: formDesc, 
             image: formImage, 
             category_id: formCategoryId,
             display_order: maxOrder,
             active: true
-          });
+          }).select();
+          console.log('Insert result:', data, error);
           if (error) {
             console.error('Insert error:', error);
             throw error;

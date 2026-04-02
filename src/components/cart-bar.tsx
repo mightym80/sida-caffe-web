@@ -1,8 +1,7 @@
 "use client";
 
-import { ShoppingCart, ArrowRight } from 'lucide-react';
-import { useCart } from '@/lib/cart-context';
 import Link from 'next/link';
+import { useCart } from '@/lib/cart-context';
 
 export function CartBar() {
   const { totalItems } = useCart();
@@ -12,17 +11,51 @@ export function CartBar() {
   return (
     <Link
       href="/cart"
-      className="fixed bottom-20 left-4 right-4 flex items-center justify-between bg-[#38BDF8] py-3.5 px-5 rounded-2xl z-40"
-      style={{ boxShadow: '0 4px 20px rgba(56, 189, 248, 0.4)' }}
+      style={{
+        position: 'fixed',
+        bottom: '76px',
+        left: '16px',
+        right: '16px',
+        maxWidth: '448px',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        backgroundColor: '#38BDF8',
+        padding: '14px 20px',
+        borderRadius: '16px',
+        zIndex: 40,
+        boxShadow: '0 4px 20px rgba(56, 189, 248, 0.4)',
+        textDecoration: 'none',
+      }}
     >
-      <div className="flex items-center">
-        <ShoppingCart size={22} className="text-[#0A0A0A]" />
-        <div className="ml-2 w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
-          <span className="text-[12px] font-extrabold text-white">{totalItems}</span>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="8" cy="21" r="1"/>
+          <circle cx="19" cy="21" r="1"/>
+          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        <div
+          style={{
+            marginLeft: '8px',
+            width: '24px',
+            height: '24px',
+            borderRadius: '12px',
+            backgroundColor: '#EF4444',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: '12px', fontWeight: 800, color: '#FFF' }}>{totalItems}</span>
         </div>
       </div>
-      <span className="text-[16px] font-bold text-[#0A0A0A]">Vedi Carrello</span>
-      <ArrowRight size={20} className="text-[#0A0A0A]" />
+      <span style={{ fontSize: '16px', fontWeight: 700, color: '#0A0A0A' }}>Vedi Carrello</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M5 12h14"/>
+        <path d="m12 5 7 7-7 7"/>
+      </svg>
     </Link>
   );
 }

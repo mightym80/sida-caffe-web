@@ -9,7 +9,6 @@ const SUPABASE_KEY = 'sb_publishable_7rHj-FAXCRRI93wBhJSwfg_Zq2k568V';
 interface Category {
   id: string;
   name: string;
-  image: string;
 }
 
 interface Product {
@@ -25,13 +24,12 @@ interface Product {
 async function getCategory(id: string): Promise<Category | null> {
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&select=*`,
+      `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&select=id,name`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
         },
-        cache: 'no-store',
       }
     );
     const data = await response.json();
@@ -45,13 +43,12 @@ async function getCategory(id: string): Promise<Category | null> {
 async function getProducts(categoryId: string): Promise<Product[]> {
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/products?category_id=eq.${categoryId}&active=eq.true&order=display_order.asc`,
+      `${SUPABASE_URL}/rest/v1/products?category_id=eq.${categoryId}&active=eq.true&order=display_order.asc&select=id,category_id,name,image,description,display_order,active`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
         },
-        cache: 'no-store',
       }
     );
     return response.json();

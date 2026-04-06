@@ -17,13 +17,12 @@ interface Category {
 async function getCategories(): Promise<Category[]> {
   try {
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/categories?active=eq.true&order=display_order.asc`,
+      `${SUPABASE_URL}/rest/v1/categories?active=eq.true&order=display_order.asc&select=id,name,image,display_order,active`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
           'Authorization': `Bearer ${SUPABASE_KEY}`,
         },
-        cache: 'no-store',
       }
     );
     

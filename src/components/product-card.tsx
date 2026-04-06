@@ -2,10 +2,18 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Plus, Minus, Coffee, X, ZoomIn } from 'lucide-react';
 import { useCart } from '@/lib/cart-context';
 import { toast } from '@/components/toaster';
-import { Product } from '@/lib/supabase';
+
+interface Product {
+  id: string;
+  category_id: string;
+  name: string;
+  image: string;
+  description: string;
+  display_order: number;
+  active: boolean;
+}
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity, removeItem } = useCart();
@@ -33,10 +41,23 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <>
-      <div className="bg-surface rounded-xl overflow-hidden border border-border flex">
+      <div style={{
+        backgroundColor: '#121212',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        border: '1px solid #2A2A2A',
+        display: 'flex',
+      }}>
         {/* Image */}
         <div 
-          className="w-24 h-24 flex-shrink-0 relative bg-surface-highlight cursor-pointer"
+          style={{
+            width: '96px',
+            height: '96px',
+            flexShrink: 0,
+            position: 'relative',
+            backgroundColor: '#1E1E1E',
+            cursor: product.image ? 'pointer' : 'default',
+          }}
           onClick={() => product.image && setShowZoom(true)}
         >
           {product.image ? (
@@ -45,52 +66,103 @@ export function ProductCard({ product }: { product: Product }) {
                 src={product.image}
                 alt={product.name}
                 fill
-                className="object-cover"
+                style={{ objectFit: 'cover' }}
               />
-              <div className="absolute bottom-1 right-1 p-1 bg-black/50 rounded">
-                <ZoomIn size={12} className="text-white" />
+              <div style={{
+                position: 'absolute',
+                bottom: '4px',
+                right: '4px',
+                padding: '4px',
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                borderRadius: '4px',
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/>
+                </svg>
               </div>
             </>
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Coffee size={32} className="text-primary/50" />
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" style={{ opacity: 0.5 }}>
+                <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+                <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+              </svg>
             </div>
           )}
         </div>
 
         {/* Info */}
-        <div className="flex-1 p-3 flex flex-col justify-between">
+        <div style={{ flex: 1, padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <h3 className="font-semibold text-text-primary text-sm">{product.name}</h3>
+            <h3 style={{ fontWeight: 600, color: '#F5F5F0', fontSize: '14px', margin: 0 }}>{product.name}</h3>
             {product.description && (
-              <p className="text-xs text-text-secondary mt-1 line-clamp-2">{product.description}</p>
+              <p style={{ fontSize: '12px', color: '#A3A3A3', marginTop: '4px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+                {product.description}
+              </p>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end mt-2">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
             {quantity === 0 ? (
               <button
                 onClick={handleAdd}
-                className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 12px',
+                  backgroundColor: '#38BDF8',
+                  color: '#0A0A0A',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
               >
-                <Plus size={16} />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
                 Aggiungi
               </button>
             ) : (
-              <div className="flex items-center gap-2 bg-surface-highlight rounded-lg p-1">
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                backgroundColor: '#1E1E1E',
+                borderRadius: '8px',
+                padding: '4px',
+              }}>
                 <button
                   onClick={handleDecrease}
-                  className="p-1 rounded bg-surface hover:bg-error/20 transition-colors"
+                  style={{
+                    padding: '4px',
+                    borderRadius: '4px',
+                    backgroundColor: '#121212',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <Minus size={16} className="text-text-primary" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
+                    <path d="M5 12h14"/>
+                  </svg>
                 </button>
-                <span className="w-6 text-center text-sm font-bold text-text-primary">{quantity}</span>
+                <span style={{ width: '24px', textAlign: 'center', fontSize: '14px', fontWeight: 700, color: '#F5F5F0' }}>{quantity}</span>
                 <button
                   onClick={handleIncrease}
-                  className="p-1 rounded bg-surface hover:bg-primary/20 transition-colors"
+                  style={{
+                    padding: '4px',
+                    borderRadius: '4px',
+                    backgroundColor: '#121212',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
                 >
-                  <Plus size={16} className="text-text-primary" />
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
                 </button>
               </div>
             )}
@@ -101,18 +173,38 @@ export function ProductCard({ product }: { product: Product }) {
       {/* Zoom Modal */}
       {showZoom && product.image && (
         <div 
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 50,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '16px',
+          }}
           onClick={() => setShowZoom(false)}
         >
-          <button className="absolute top-4 right-4 p-2 bg-surface rounded-full">
-            <X size={24} className="text-text-primary" />
+          <button style={{
+            position: 'absolute',
+            top: '16px',
+            right: '16px',
+            padding: '8px',
+            backgroundColor: '#121212',
+            borderRadius: '50%',
+            border: 'none',
+            cursor: 'pointer',
+          }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
           </button>
           <Image
             src={product.image}
             alt={product.name}
             width={400}
             height={400}
-            className="max-w-full max-h-[80vh] object-contain rounded-lg"
+            style={{ maxWidth: '100%', maxHeight: '80vh', objectFit: 'contain', borderRadius: '8px' }}
           />
         </div>
       )}

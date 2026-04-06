@@ -1,21 +1,42 @@
-import { supabase, Category } from '@/lib/supabase';
 import Link from 'next/link';
 import Image from 'next/image';
 import { CartBar } from '@/components/cart-bar';
 import { BottomNav } from '@/components/bottom-nav';
 
+const SUPABASE_URL = 'https://wyvcwibhcayassfqgofh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7rHj-FAXCRRI93wBhJSwfg_Zq2k568V';
+
+interface Category {
+  id: string;
+  name: string;
+  image: string;
+  display_order: number;
+  active: boolean;
+}
+
 async function getCategories(): Promise<Category[]> {
-  const { data, error } = await supabase
-    .from('categories')
-    .select('*')
-    .eq('active', true)
-    .order('display_order', { ascending: true });
-  
-  if (error) {
+  try {
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/categories?active=eq.true&order=display_order.asc`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+        },
+        cache: 'no-store',
+      }
+    );
+    
+    if (!response.ok) {
+      console.error('Supabase error:', response.status);
+      return [];
+    }
+    
+    return response.json();
+  } catch (error) {
     console.error('Error fetching categories:', error);
     return [];
   }
-  return data || [];
 }
 
 export const revalidate = 0;

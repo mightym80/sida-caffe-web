@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
@@ -145,11 +144,11 @@ export default function CartPage() {
     return (
       <main className="mobile-container pb-safe" style={{ backgroundColor: '#050505', minHeight: '100vh' }}>
         <header style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link href="/" style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button onClick={() => window.location.href = '/'} style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
               <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
             </svg>
-          </Link>
+          </button>
           <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Il Tuo Ordine</h1>
         </header>
 
@@ -160,7 +159,7 @@ export default function CartPage() {
           </svg>
           <h2 style={{ fontSize: '20px', fontWeight: 600, color: '#F5F5F0', marginBottom: '8px' }}>Carrello vuoto</h2>
           <p style={{ fontSize: '14px', color: '#888', marginBottom: '24px' }}>Aggiungi prodotti per iniziare</p>
-          <Link href="/" style={{
+          <button onClick={() => window.location.href = '/'} style={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
@@ -170,10 +169,11 @@ export default function CartPage() {
             borderRadius: '12px',
             fontWeight: 600,
             fontSize: '15px',
-            textDecoration: 'none',
+            border: 'none',
+            cursor: 'pointer',
           }}>
             Sfoglia Prodotti
-          </Link>
+          </button>
         </div>
 
         <BottomNav />
@@ -195,11 +195,11 @@ export default function CartPage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: '480px', margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <Link href="/" style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button onClick={() => window.location.href = '/'} style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
                 <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
               </svg>
-            </Link>
+            </button>
             <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Il Tuo Ordine</h1>
           </div>
         </div>

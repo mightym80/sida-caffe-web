@@ -271,9 +271,9 @@ export default function AdminProductsPage() {
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#050505' }}>
       <header style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px' }}>
-        <Link href="/admin/dashboard" style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => window.location.href = '/admin/dashboard'} style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#121212', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-        </Link>
+        </button>
         <h1 style={{ flex: 1, fontSize: '20px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>Gestione Prodotti</h1>
       </header>
 

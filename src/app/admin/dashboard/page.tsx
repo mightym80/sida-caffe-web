@@ -122,9 +122,14 @@ export default function AdminDashboardPage() {
     <main style={{ minHeight: '100vh', backgroundColor: '#050505', paddingBottom: '20px' }}>
       {/* Header */}
       <header style={{ padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#D4AF37', margin: 0 }}>SIDA Caffè</h1>
-          <p style={{ fontSize: '14px', color: '#888', marginTop: '2px' }}>Gestione Ordini ({orders.length})</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => window.location.href = '/'} style={{ width: '44px', height: '44px', borderRadius: '22px', backgroundColor: '#1A1A1A', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </button>
+          <div>
+            <h1 style={{ fontSize: '26px', fontWeight: 700, color: '#D4AF37', margin: 0 }}>SIDA Caffè</h1>
+            <p style={{ fontSize: '14px', color: '#888', marginTop: '2px' }}>Gestione Ordini ({orders.length})</p>
+          </div>
         </div>
         <button onClick={handleLogout} style={{ width: '48px', height: '48px', borderRadius: '24px', backgroundColor: '#1A1A1A', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>

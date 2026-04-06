@@ -143,8 +143,8 @@ export default function CategoryPage() {
         padding: '16px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', maxWidth: '480px', margin: '0 auto' }}>
-          <Link 
-            href="/" 
+          <button 
+            onClick={() => window.location.href = '/'}
             style={{
               width: '40px',
               height: '40px',
@@ -153,12 +153,14 @@ export default function CategoryPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              border: 'none',
+              cursor: 'pointer',
             }}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
               <path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>
             </svg>
-          </Link>
+          </button>
           <div style={{ flex: 1 }}>
             <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{category.name}</h1>
             <p style={{ fontSize: '12px', color: '#A3A3A3', margin: '2px 0 0 0' }}>{products.length} prodotti</p>

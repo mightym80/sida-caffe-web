@@ -40,7 +40,7 @@ async function supabaseFetch(table: string, method: string, body?: any, id?: str
 
 async function getCategories() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/categories?order=display_order.asc&select=id,name,image,display_order,active`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/categories?order=display_order.asc&select=id,name,display_order,active`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
     });
     if (!response.ok) return [];
@@ -53,7 +53,7 @@ async function getCategories() {
 
 async function getProducts() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?order=display_order.asc&select=id,name,image,category_id,description,display_order,active`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?order=display_order.asc&select=id,name,category_id,description,display_order,active`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
     });
     if (!response.ok) return [];
@@ -309,12 +309,8 @@ export default function AdminProductsPage() {
             ) : (
               (tab === 'categories' ? categories : filteredProducts).map((item) => (
                 <div key={item.id} style={{ display: 'flex', alignItems: 'center', backgroundColor: '#121212', borderRadius: '12px', padding: '12px', marginBottom: '8px', border: '1px solid #2A2A2A' }}>
-                  <div style={{ width: '52px', height: '52px', borderRadius: '8px', backgroundColor: '#1E1E1E', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                    {item.image ? (<Image src={item.image} alt={item.name} fill style={{ objectFit: 'cover' }} />) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/></svg>
-                      </div>
-                    )}
+                  <div style={{ width: '52px', height: '52px', borderRadius: '8px', backgroundColor: '#1E1E1E', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/></svg>
                   </div>
                   <div style={{ flex: 1, marginLeft: '12px' }}>
                     <p style={{ fontSize: '15px', fontWeight: 600, color: '#F5F5F0', margin: 0 }}>{item.name}</p>

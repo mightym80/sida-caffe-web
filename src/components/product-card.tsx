@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useCart } from '@/lib/cart-context';
 import { toast } from '@/components/toaster';
+
+const FAVORITES_KEY = 'sida-favorites';
 
 interface Product {
   id: string;
@@ -15,12 +17,62 @@ interface Product {
   active: boolean;
 }
 
+interface Favorite {
+  id: string;
+  name: string;
+  image: string;
+}
+
 export function ProductCard({ product }: { product: Product }) {
   const { addItem, items, updateQuantity, removeItem } = useCart();
   const [showZoom, setShowZoom] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   
   const cartItem = items.find(i => i.id === product.id);
   const quantity = cartItem?.quantity || 0;
+
+  // Check if product is in favorites on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(FAVORITES_KEY);
+    if (saved) {
+      try {
+        const favorites: Favorite[] = JSON.parse(saved);
+        setIsFavorite(favorites.some(f => f.id === product.id));
+      } catch (e) {
+        console.error('Error loading favorites:', e);
+      }
+    }
+  }, [product.id]);
+
+  const toggleFavorite = () => {
+    const saved = localStorage.getItem(FAVORITES_KEY);
+    let favorites: Favorite[] = [];
+    
+    if (saved) {
+      try {
+        favorites = JSON.parse(saved);
+      } catch (e) {
+        favorites = [];
+      }
+    }
+
+    if (isFavorite) {
+      // Remove from favorites
+      favorites = favorites.filter(f => f.id !== product.id);
+      toast('Rimosso dai preferiti', 'success');
+    } else {
+      // Add to favorites
+      favorites.push({
+        id: product.id,
+        name: product.name,
+        image: product.image,
+      });
+      toast('Aggiunto ai preferiti', 'success');
+    }
+
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    setIsFavorite(!isFavorite);
+  };
 
   const handleAdd = () => {
     addItem({ id: product.id, name: product.name, image: product.image });
@@ -92,18 +144,42 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* Info */}
-        <div style={{ flex: 1, padding: '12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-          <div>
-            <h3 style={{ fontWeight: 600, color: '#F5F5F0', fontSize: '14px', margin: 0 }}>{product.name}</h3>
-            {product.description && (
-              <p style={{ fontSize: '12px', color: '#A3A3A3', marginTop: '4px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
-                {product.description}
-              </p>
-            )}
+        <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1 }}>
+              <h3 style={{ fontWeight: 600, color: '#F5F5F0', fontSize: '14px', margin: 0 }}>{product.name}</h3>
+              {product.description && (
+                <p style={{ fontSize: '11px', color: '#A3A3A3', marginTop: '2px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
+                  {product.description}
+                </p>
+              )}
+            </div>
+            {/* Favorite Button */}
+            <button
+              onClick={toggleFavorite}
+              style={{
+                padding: '6px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                marginLeft: '4px',
+              }}
+            >
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill={isFavorite ? '#38BDF8' : 'none'} 
+                stroke={isFavorite ? '#38BDF8' : '#666'} 
+                strokeWidth="2"
+              >
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+              </svg>
+            </button>
           </div>
 
           {/* Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '6px' }}>
             {quantity === 0 ? (
               <button
                 onClick={handleAdd}

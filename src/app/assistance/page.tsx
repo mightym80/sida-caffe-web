@@ -1,9 +1,12 @@
 "use client";
 
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
 import { BottomNav } from '@/components/bottom-nav';
 import { toast } from '@/components/toaster';
+
+const SUPABASE_URL = 'https://wyvcwibhcayassfqgofh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7rHj-FAXCRRI93wBhJSwfg_Zq2k568V';
+const CUSTOMER_DATA_KEY = 'sida-customer-data';
 
 export default function AssistancePage() {
   const [loading, setLoading] = useState(false);
@@ -17,6 +20,26 @@ export default function AssistancePage() {
     notes: '',
   });
 
+  // Load saved customer data on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(CUSTOMER_DATA_KEY);
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        setForm(prev => ({
+          ...prev,
+          name: data.name || '',
+          surname: data.surname || '',
+          address: data.address || '',
+          phone: data.phone || '',
+          town: data.town || '',
+        }));
+      } catch (e) {
+        console.error('Error loading customer data:', e);
+      }
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -27,24 +50,45 @@ export default function AssistancePage() {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('orders').insert({
-        customer_name: form.name,
-        customer_surname: form.surname,
-        customer_address: form.address,
-        customer_phone: form.phone,
-        customer_town: form.town,
-        items: [{ product_name: 'Richiesta Assistenza', quantity: 1 }],
-        total_items: 1,
-        order_type: 'assistance',
-        notes: form.notes,
-        status: 'pending',
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=representation',
+        },
+        body: JSON.stringify({
+          customer_name: form.name,
+          customer_surname: form.surname,
+          customer_address: form.address,
+          customer_phone: form.phone,
+          customer_town: form.town,
+          items: [{ product_name: 'Richiesta Assistenza', quantity: 1 }],
+          total_items: 1,
+          order_type: 'assistance',
+          notes: form.notes,
+          status: 'pending',
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text);
+      }
+
+      // Save customer data
+      localStorage.setItem(CUSTOMER_DATA_KEY, JSON.stringify({
+        name: form.name,
+        surname: form.surname,
+        address: form.address,
+        phone: form.phone,
+        town: form.town,
+      }));
 
       setSent(true);
       toast('Richiesta inviata con successo!', 'success');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error);
       toast('Errore durante l\'invio della richiesta', 'error');
     } finally {
@@ -133,7 +177,7 @@ export default function AssistancePage() {
       </section>
 
       {/* Form */}
-      <section style={{ padding: '0 16px' }}>
+      <section style={{ padding: '0 16px', paddingBottom: '100px' }}>
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#A3A3A3', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Nome *</label>
@@ -149,6 +193,7 @@ export default function AssistancePage() {
                 padding: '14px 16px',
                 color: '#F5F5F0',
                 fontSize: '15px',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -167,6 +212,7 @@ export default function AssistancePage() {
                 padding: '14px 16px',
                 color: '#F5F5F0',
                 fontSize: '15px',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -185,6 +231,7 @@ export default function AssistancePage() {
                 padding: '14px 16px',
                 color: '#F5F5F0',
                 fontSize: '15px',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -203,6 +250,7 @@ export default function AssistancePage() {
                 padding: '14px 16px',
                 color: '#F5F5F0',
                 fontSize: '15px',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -221,6 +269,7 @@ export default function AssistancePage() {
                 padding: '14px 16px',
                 color: '#F5F5F0',
                 fontSize: '15px',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -241,6 +290,7 @@ export default function AssistancePage() {
                 fontSize: '15px',
                 minHeight: '100px',
                 resize: 'none',
+                boxSizing: 'border-box',
               }}
             />
           </div>

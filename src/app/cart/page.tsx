@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -10,11 +10,21 @@ import { toast } from '@/components/toaster';
 
 const SUPABASE_URL = 'https://wyvcwibhcayassfqgofh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_7rHj-FAXCRRI93wBhJSwfg_Zq2k568V';
+const CUSTOMER_DATA_KEY = 'sida-customer-data';
+
+interface CustomerData {
+  name: string;
+  surname: string;
+  address: string;
+  phone: string;
+  town: string;
+}
 
 export default function CartPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, clearCart, totalItems } = useCart();
   const [loading, setLoading] = useState(false);
+  const [showClearDialog, setShowClearDialog] = useState(false);
   const [form, setForm] = useState({
     name: '',
     surname: '',
@@ -23,6 +33,61 @@ export default function CartPage() {
     town: '',
     notes: '',
   });
+
+  // Load saved customer data on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(CUSTOMER_DATA_KEY);
+    if (saved) {
+      try {
+        const data: CustomerData = JSON.parse(saved);
+        setForm(prev => ({
+          ...prev,
+          name: data.name || '',
+          surname: data.surname || '',
+          address: data.address || '',
+          phone: data.phone || '',
+          town: data.town || '',
+        }));
+      } catch (e) {
+        console.error('Error loading customer data:', e);
+      }
+    }
+  }, []);
+
+  // Save customer data when form changes (except notes)
+  const saveCustomerData = (data: CustomerData) => {
+    localStorage.setItem(CUSTOMER_DATA_KEY, JSON.stringify(data));
+  };
+
+  const handleFormChange = (field: string, value: string) => {
+    const newForm = { ...form, [field]: value };
+    setForm(newForm);
+    
+    // Save to localStorage (exclude notes)
+    if (field !== 'notes') {
+      saveCustomerData({
+        name: newForm.name,
+        surname: newForm.surname,
+        address: newForm.address,
+        phone: newForm.phone,
+        town: newForm.town,
+      });
+    }
+  };
+
+  const clearCustomerData = () => {
+    localStorage.removeItem(CUSTOMER_DATA_KEY);
+    setForm({
+      name: '',
+      surname: '',
+      address: '',
+      phone: '',
+      town: '',
+      notes: '',
+    });
+    setShowClearDialog(false);
+    toast('Dati cliente cancellati', 'success');
+  };
 
   const handleSubmit = async () => {
     if (!form.name || !form.surname || !form.address || !form.phone || !form.town) {
@@ -200,7 +265,32 @@ export default function CartPage() {
 
         {/* Customer Data Form */}
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#38BDF8', marginBottom: '16px' }}>Dati Cliente</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#38BDF8', margin: 0 }}>Dati Cliente</h2>
+            {(form.name || form.surname || form.address || form.phone || form.town) && (
+              <button
+                onClick={() => setShowClearDialog(true)}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #EF4444',
+                  borderRadius: '8px',
+                  color: '#EF4444',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+                Cancella
+              </button>
+            )}
+          </div>
           
           {/* Name & Surname Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
@@ -209,7 +299,7 @@ export default function CartPage() {
               <input
                 type="text"
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => handleFormChange('name', e.target.value)}
                 placeholder="Nome"
                 style={{
                   width: '100%',
@@ -228,7 +318,7 @@ export default function CartPage() {
               <input
                 type="text"
                 value={form.surname}
-                onChange={(e) => setForm({ ...form, surname: e.target.value })}
+                onChange={(e) => handleFormChange('surname', e.target.value)}
                 placeholder="Cognome"
                 style={{
                   width: '100%',
@@ -250,7 +340,7 @@ export default function CartPage() {
             <input
               type="text"
               value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
+              onChange={(e) => handleFormChange('address', e.target.value)}
               placeholder="Via/Piazza, Numero"
               style={{
                 width: '100%',
@@ -272,7 +362,7 @@ export default function CartPage() {
               <input
                 type="text"
                 value={form.town}
-                onChange={(e) => setForm({ ...form, town: e.target.value })}
+                onChange={(e) => handleFormChange('town', e.target.value)}
                 placeholder="Paese"
                 style={{
                   width: '100%',
@@ -291,7 +381,7 @@ export default function CartPage() {
               <input
                 type="tel"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                onChange={(e) => handleFormChange('phone', e.target.value)}
                 placeholder="Telefono"
                 style={{
                   width: '100%',
@@ -312,7 +402,7 @@ export default function CartPage() {
             <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, color: '#A3A3A3', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Note (opzionale)</label>
             <textarea
               value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              onChange={(e) => handleFormChange('notes', e.target.value)}
               placeholder="Note aggiuntive..."
               style={{
                 width: '100%',
@@ -369,6 +459,69 @@ export default function CartPage() {
       </div>
 
       <BottomNav />
+
+      {/* Clear Customer Data Dialog */}
+      {showClearDialog && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+        }}>
+          <div style={{
+            backgroundColor: '#121212',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '320px',
+            width: '100%',
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#F5F5F0', marginBottom: '12px' }}>
+              Cancellare i dati?
+            </h3>
+            <p style={{ fontSize: '14px', color: '#A3A3A3', marginBottom: '20px' }}>
+              I tuoi dati salvati verranno eliminati. Dovrai reinserirli al prossimo ordine.
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowClearDialog(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '10px',
+                  backgroundColor: '#1E1E1E',
+                  border: 'none',
+                  color: '#A3A3A3',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Annulla
+              </button>
+              <button
+                onClick={clearCustomerData}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '10px',
+                  backgroundColor: '#EF4444',
+                  border: 'none',
+                  color: '#FFF',
+                  fontSize: '15px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancella
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes spin {

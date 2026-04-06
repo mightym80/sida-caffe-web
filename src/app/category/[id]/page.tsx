@@ -1,7 +1,13 @@
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ProductCard } from '@/components/product-card';
+import Image from 'next/image';
 import { BottomNav } from '@/components/bottom-nav';
 import { CartBar } from '@/components/cart-bar';
+import { useCart } from '@/lib/cart-context';
+import { toast } from '@/components/toaster';
 
 const SUPABASE_URL = 'https://wyvcwibhcayassfqgofh.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_7rHj-FAXCRRI93wBhJSwfg_Zq2k568V';
@@ -17,56 +23,63 @@ interface Product {
   name: string;
   image: string;
   description: string;
-  display_order: number;
-  active: boolean;
 }
 
-async function getCategory(id: string): Promise<Category | null> {
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&select=id,name`,
-      {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-        },
+export default function CategoryPage() {
+  const params = useParams();
+  const id = params.id as string;
+  
+  const [category, setCategory] = useState<Category | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addItem, items, updateQuantity, removeItem } = useCart();
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // Load category (without image)
+        const catRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/categories?id=eq.${id}&select=id,name`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const catData = await catRes.json();
+        setCategory(catData?.[0] || null);
+
+        // Load products (without image initially for speed)
+        const prodRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/products?category_id=eq.${id}&active=eq.true&order=display_order.asc&select=id,category_id,name,description,image`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const prodData = await prodRes.json();
+        setProducts(prodData || []);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
       }
+    }
+    
+    if (id) loadData();
+  }, [id]);
+
+  const getQuantity = (productId: string) => {
+    const item = items.find(i => i.id === productId);
+    return item?.quantity || 0;
+  };
+
+  const handleAdd = (product: Product) => {
+    addItem({ id: product.id, name: product.name, image: product.image });
+    toast(`${product.name} aggiunto`, 'success');
+  };
+
+  if (loading) {
+    return (
+      <main style={{ minHeight: '100vh', backgroundColor: '#050505', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: '32px', height: '32px', border: '3px solid #38BDF8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </main>
     );
-    const data = await response.json();
-    return data?.[0] || null;
-  } catch (error) {
-    console.error('Error fetching category:', error);
-    return null;
   }
-}
-
-async function getProducts(categoryId: string): Promise<Product[]> {
-  try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/products?category_id=eq.${categoryId}&active=eq.true&order=display_order.asc&select=id,category_id,name,image,description,display_order,active`,
-      {
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-        },
-      }
-    );
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    return [];
-  }
-}
-
-export const revalidate = 0;
-export const dynamic = 'force-dynamic';
-
-export default async function CategoryPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const [category, products] = await Promise.all([
-    getCategory(id),
-    getProducts(id),
-  ]);
 
   if (!category) {
     return (
@@ -106,27 +119,110 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
             </svg>
           </Link>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#F5F5F0', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{category.name}</h1>
+            <h1 style={{ fontSize: '18px', fontWeight: 700, color: '#F5F5F0', margin: 0 }}>{category.name}</h1>
             <p style={{ fontSize: '12px', color: '#A3A3A3', margin: '2px 0 0 0' }}>{products.length} prodotti</p>
           </div>
         </div>
       </header>
 
       {/* Products */}
-      <section style={{ padding: '16px', maxWidth: '480px', margin: '0 auto' }}>
+      <section style={{ padding: '16px', maxWidth: '480px', margin: '0 auto', paddingBottom: '120px' }}>
         {products.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 0' }}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2A2A2A" strokeWidth="1.5" style={{ margin: '0 auto 16px' }}>
-              <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
-              <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
-            </svg>
             <p style={{ color: '#A3A3A3', fontSize: '15px' }}>Nessun prodotto disponibile</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
+            {products.map((product) => {
+              const quantity = getQuantity(product.id);
+              
+              return (
+                <div key={product.id} style={{
+                  backgroundColor: '#121212',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  border: '1px solid #2A2A2A',
+                  display: 'flex',
+                }}>
+                  {/* Image */}
+                  <div style={{ width: '90px', height: '90px', flexShrink: 0, position: 'relative', backgroundColor: '#1E1E1E' }}>
+                    {product.image ? (
+                      <Image src={product.image} alt={product.name} fill style={{ objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth="2" style={{ opacity: 0.5 }}>
+                          <path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <h3 style={{ fontWeight: 600, color: '#F5F5F0', fontSize: '14px', margin: 0 }}>{product.name}</h3>
+                      {product.description && (
+                        <p style={{ fontSize: '11px', color: '#A3A3A3', marginTop: '2px', margin: 0 }}>{product.description}</p>
+                      )}
+                    </div>
+
+                    {/* Cart Controls */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                      {quantity === 0 ? (
+                        <button
+                          onClick={() => handleAdd(product)}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '8px 14px',
+                            backgroundColor: '#38BDF8',
+                            color: '#0A0A0A',
+                            borderRadius: '8px',
+                            fontSize: '13px',
+                            fontWeight: 600,
+                            border: 'none',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M12 5v14M5 12h14"/>
+                          </svg>
+                          Aggiungi
+                        </button>
+                      ) : (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          backgroundColor: '#1E1E1E',
+                          borderRadius: '8px',
+                          padding: '4px',
+                        }}>
+                          <button
+                            onClick={() => quantity > 1 ? updateQuantity(product.id, quantity - 1) : removeItem(product.id)}
+                            style={{ padding: '6px', borderRadius: '6px', backgroundColor: '#121212', border: 'none', cursor: 'pointer' }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
+                              <path d="M5 12h14"/>
+                            </svg>
+                          </button>
+                          <span style={{ width: '24px', textAlign: 'center', fontSize: '15px', fontWeight: 700, color: '#F5F5F0' }}>{quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(product.id, quantity + 1)}
+                            style={{ padding: '6px', borderRadius: '6px', backgroundColor: '#121212', border: 'none', cursor: 'pointer' }}
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5F5F0" strokeWidth="2">
+                              <path d="M12 5v14M5 12h14"/>
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </section>

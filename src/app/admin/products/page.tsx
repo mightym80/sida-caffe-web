@@ -41,12 +41,16 @@ async function supabaseFetch(table: string, method: string, body?: any, id?: str
 
 async function getCategories() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/categories?order=display_order.asc`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=*&order=display_order.asc`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      cache: 'no-store',
     });
-    if (!response.ok) return [];
-    return response.json();
+    if (!response.ok) {
+      console.error('Categories fetch error:', response.status);
+      return [];
+    }
+    const data = await response.json();
+    console.log('Categories loaded:', data.length);
+    return data;
   } catch (err) {
     console.error('Error loading categories:', err);
     return [];
@@ -55,12 +59,16 @@ async function getCategories() {
 
 async function getProducts() {
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?order=display_order.asc`, {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=display_order.asc`, {
       headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
-      cache: 'no-store',
     });
-    if (!response.ok) return [];
-    return response.json();
+    if (!response.ok) {
+      console.error('Products fetch error:', response.status);
+      return [];
+    }
+    const data = await response.json();
+    console.log('Products loaded:', data.length);
+    return data;
   } catch (err) {
     console.error('Error loading products:', err);
     return [];
